@@ -1,0 +1,5 @@
+#Request is in character since the input from the user will be a character from the keyboard
+char command
+---
+#Response would be the resultant speed that the robot drives with after increasing/decreasing the speed
+float32 rspeed
