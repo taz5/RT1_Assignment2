@@ -19,24 +19,20 @@ float max_sp = 3.0; // Subject to change after testing.
 // Initializing the variable that will change the resultant speed based on the input.
 float manip_sp = 0.0;
 
-/*
-Based on the file my_world.world, the following information was achieved with respect to
-the sensor. The field of view of the sensor is 180, minimum range of the sensor is 0 and
-maximum range of the sensor is 30, and that there are 721 elements of the ranges vector
-that need to be divided into subsections. 
-*/
-float range = 29.0;
-float laser_elements[721];
 // Here I have also defined threshold for the control of the linear distance just like I
 // did in the first assignment.
-float d_th = 2.0;
+float d_th = 3.0;
 // For any for-loop
+float laser_scanning[720];
 int i;
 
 // Publisher is set that is global throughout
 ros::Publisher pub;
 // A Service Server created to deal with the change in speed
 ros::ServiceServer ch_in_sp;
+//ros::ServiceServer res_pos;
+// Empty Service
+std_srvs::Empty reset;
 // Setting the initial velocity of the robot to 0
 float velocity = 0.0;
 
@@ -46,7 +42,7 @@ float velocity = 0.0;
 Here we are call the following functions:
 1. A function to get the respond to the request put forward by the user.
 2. A function that will calculate the minimum distance of the robot from an obstacle.
-3. A function that uses the above function to avoid any obstacle on either the left,
+   The function is also used to avoid any obstacle on either the left,
 right or front of the robot. If it isn't then it can move forward.
 */
 
@@ -79,6 +75,10 @@ case('s'):
     }
 break;
 
+case('r'):
+     // This will request the robot to reset its position.
+     ros::service::call("/resetting_position", reset);
+
  default:
      // In case some other button is pressed.
      // In this case ros::shutdown is used kill the node.
@@ -91,25 +91,9 @@ res.rspeed = manip_sp;
 return true;
 }
 
-//2. Function to calculate the minimum distance of the robot from the obstacle.
-/*
-This function will return a value with respect to the robot's minimum distance from the
-obstacle. Hence, the function will be a float function.
-*/
 
-float ObsDistfromRob(int min_element, int max_element, float obst_dist[]){
-
-// For loop to determine the minimum distance
-for (i = min_element; i < max_element; i++)
-{
-    if (obst_dist[i] <= range)
-        range = obst_dist[i];
-}
-return range;
-}
-
-
-// 3. The callback function that processes information from the Laser.
+// 2. Function to calculate the minimum distance of the robot from the obstacle.
+// The callback function that processes information from the Laser.
 /* A hint was given to divide the ranges vector into subsections, and take the minimum
 of each subsection. This will provide information about the closest obstacles. 
 There are a total of 721 elements. So I am going to divide then from 0 to 100, 300 to 400
@@ -120,32 +104,69 @@ void laser_callback(const sensor_msgs::LaserScan::ConstPtr& scanning){
 // Here I will be using geometry_msgs:: Twist as it is used to express velocity in free space normally broken down into linear and angular parts.
 geometry_msgs::Twist vel;
 
-// For loop to do the scanning and give the data with respect to the obstacle distance
-for(i = 0; i <= 721; i++){
-    laser_elements[i] = scanning -> ranges[i];
-}
-
 // The above for loop will help us with the function that calculates the minimum
 // distance.
 
 // For Front side of the robot
-float front = ObsDistfromRob(300, 400, laser_elements);
+float front = 0;
 // For Right side of the robot
-float right = ObsDistfromRob(0, 100, laser_elements);
+float right = 0;
 // For Left side of the robot
-float left = ObsDistfromRob(615, 715, laser_elements);
+float left = 0;
 
+/*
+Based on the file my_world.world, the following information was achieved with respect to
+the sensor. The field of view of the sensor is 180, minimum range of the sensor is 0 and
+maximum range of the sensor is 30, and that there are 721 elements of the ranges vector
+that need to be divided into subsections. 
+*/
+// We initialize the range to be the threshold we got familiar with in Assignment 1.
+float range = d_th;
+
+for(i = 0; i < 721; i++){
+    laser_scanning[i] = scanning -> ranges[i];
+}
+
+
+
+// Laser Scanning of the right side of the robot
+for(i = 0; i < 100; i++){
+    if(laser_scanning[i] < range) {
+        range = laser_scanning[i];
+    }
+}
+right = range;
+range = d_th;
+
+// Laser Scanning of the left side of the robot
+for(i = 620; i < 720; i++){
+    if(laser_scanning[i] < range) {
+        range = laser_scanning[i];
+    }
+}
+right = range;
+range = d_th;
+
+// Laser Scanning of the front side of the robot
+for(i = 300; i < 400; i++){
+    if(laser_scanning[i] < range) {
+        range = laser_scanning[i];
+    }
+}
+front = range;
+range = d_th;
+    
 // For obstacle in front of the robot
-if (front < d_th){
+if (front < 1.5){
     // In case there is an obstacle on the left
     if(left < right) {
-       vel.linear.x = 0.5;
+       vel.linear.x = 0.2;
        vel.angular.z = -1.0;
     }
     
     // In case there is an obstacle on the right
     else if(right < left) {
-       vel.linear.x = 0.5;
+       vel.linear.x = 0.2;
        vel.angular.z = 1.0;
     }
 }
@@ -153,6 +174,16 @@ else // Drive straight
 {
     vel.linear.x = manip_sp;
     vel.angular.z = 0.0;
+    
+    /* 
+    Just like the first assignment, we need to take into consideration that there is
+    a possibility that the robot will move backwards if something goes wrong with the
+    computation. So we can create a simple if condition to counter that.
+    */
+    if(vel.linear.x < 0.0){
+        vel.linear.x = 0.0;
+        vel.angular.z = 0.0;
+    }
 }
 
 // Towards the end of the function it needs to publish the /cmd_vel topic.
@@ -160,7 +191,6 @@ pub.publish(vel);
 
 
 }
-
 
 // Main Function
 int main(int argc, char **argv){
@@ -184,7 +214,8 @@ In our case, we will set this parameter as 1 since we need to be size of the mes
 // One of the tasks is for us to publish a velocity on the cmd_vel topic. Hence, here I have published it.
 pub = n.advertise<geometry_msgs::Twist>("/cmd_vel",1);
 ros::Subscriber sub=n.subscribe("/base_scan",1, laser_callback);
-ch_in_sp = n.advertiseService("/manipulate_speed",speed_response);
+ch_in_sp = n.advertiseService("manipulate_speed",speed_response);
+//res_pos = n.advertiseService("resetting_robot_position",reset_robpos);
 ros::spin(); 
 return 0;
 }

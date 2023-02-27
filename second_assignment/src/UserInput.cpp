@@ -22,7 +22,7 @@ ros::ServiceClient reset_robot;
 // Using a service client to change speed of the robot.
 ros::ServiceClient robot_speed;
 
-std_srvs::Empty reset;
+//std_srvs::Empty reset;
 second_assignment::robotspeed robspeed;
 
 
@@ -43,7 +43,7 @@ ros::NodeHandle n;
  to multiple things and publish multiple things. Multiple other nodes can subscribe to
  the same topic. You can even have multiple nodes publishing the same topic. 
 */
-reset_robot = n.serviceClient<std_srvs::Empty>("resetting_robot_position");
+//reset_robot = n.serviceClient<std_srvs::Empty>("resetting_robot_position");
 robot_speed = n.serviceClient<second_assignment::robotspeed>("manipulate_speed");
 
 /* After the node is initiated, we need to set a set a rate at which the node is working.
@@ -92,8 +92,9 @@ while(ros::ok())
  break;
  case ('r'):
      // This will request the robot to reset its position.
-     reset_robot.waitForExistence();
-     reset_robot.call(reset);
+     robot_speed.waitForExistence();
+     robspeed.request.command = 'r';
+     robot_speed.call(robspeed);
      std::cout<<"Resetting the position of the robot!!\n";
  break;
  default:
