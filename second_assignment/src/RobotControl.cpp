@@ -98,8 +98,8 @@ return true;
 // The callback function that processes information from the Laser.
 /* A hint was given to divide the ranges vector into subsections, and take the minimum
 of each subsection. This will provide information about the closest obstacles. 
-There are a total of 721 elements. So I am going to divide then from 0 to 100, 300 to 400
-and 621 to 721.
+There are a total of 721 elements. So I am going to divide then from 0 to 143, 288 to 431
+and 576 to 713.
 */
 
 void laser_callback(const sensor_msgs::LaserScan::ConstPtr& scanning){
