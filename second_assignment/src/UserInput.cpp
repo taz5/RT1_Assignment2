@@ -99,7 +99,7 @@ while(ros::ok())
  default:
      // In case some other button is pressed.
      // In this case ros::shutdown is used kill the node.
-     /std::cout<<"Wrong Command! Shutting down User Control! Goodbye!";
+     std::cout<<"Wrong Command! Shutting down User Control! Goodbye!";
      ros::shutdown();
  break;        
  }
