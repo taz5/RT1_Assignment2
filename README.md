@@ -281,7 +281,7 @@ In the MAIN FUNCTION
 
 Initialize the node and nodehandle
 
-Publish cmd_vel, subscribe for information given by the laser and then a
+Publish, subscribe and AdvertiseService
 pub = n.advertise<geometry_msgs::Twist>("/cmd_vel",1);
 ros::Subscriber sub=n.subscribe("/base_scan",1, laser_callback);
 ch_in_sp = n.advertiseService("manipulate_speed",speed_response);
