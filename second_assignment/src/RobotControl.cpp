@@ -77,7 +77,6 @@ break;
 case('r'):
      // This will request the robot to reset its position.
      ros::service::call("/reset_positions", reset);
-     req.command = 't';
 break;     
 
 default:
