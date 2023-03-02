@@ -30,7 +30,6 @@ int i;
 ros::Publisher pub;
 // A Service Server created to deal with the change in speed
 ros::ServiceServer ch_in_sp;
-//ros::ServiceServer res_pos;
 // Empty Service
 std_srvs::Empty reset;
 // Setting the initial velocity of the robot to 0
@@ -77,11 +76,14 @@ break;
 
 case('r'):
      // This will request the robot to reset its position.
-     ros::service::call("/resetting_position", reset);
+     ros::service::call("/reset_positions", reset);
+     req.command = 't';
+break;     
 
- default:
+default:
      // In case some other button is pressed.
      // In this case ros::shutdown is used kill the node.
+     std::cout<<"Wrong Command! Goodbye!";
      ros::shutdown();
 break;
 }    
@@ -130,7 +132,7 @@ for(i = 0; i < 721; i++){
 
 
 // Laser Scanning of the right side of the robot
-for(i = 0; i < 100; i++){
+for(i = 0; i < 143; i++){
     if(laser_scanning[i] < range) {
         range = laser_scanning[i];
     }
@@ -139,16 +141,16 @@ right = range;
 range = d_th;
 
 // Laser Scanning of the left side of the robot
-for(i = 620; i < 720; i++){
+for(i = 576; i < 713; i++){
     if(laser_scanning[i] < range) {
         range = laser_scanning[i];
     }
 }
-right = range;
+left = range;
 range = d_th;
 
 // Laser Scanning of the front side of the robot
-for(i = 300; i < 400; i++){
+for(i = 288; i < 431; i++){
     if(laser_scanning[i] < range) {
         range = laser_scanning[i];
     }
@@ -215,7 +217,6 @@ In our case, we will set this parameter as 1 since we need to be size of the mes
 pub = n.advertise<geometry_msgs::Twist>("/cmd_vel",1);
 ros::Subscriber sub=n.subscribe("/base_scan",1, laser_callback);
 ch_in_sp = n.advertiseService("manipulate_speed",speed_response);
-//res_pos = n.advertiseService("resetting_robot_position",reset_robpos);
 ros::spin(); 
 return 0;
 }
