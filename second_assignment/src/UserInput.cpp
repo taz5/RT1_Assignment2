@@ -17,8 +17,6 @@ the input command and the resultant speed. */
 between the service and the client. This has been used in order to invoke a reset command
 in the order to put the robot back in its initial position.*/
 
-// Using a service client to reset the position of the robot.
-ros::ServiceClient reset_robot;
 // Using a service client to change speed of the robot.
 ros::ServiceClient robot_speed;
 
