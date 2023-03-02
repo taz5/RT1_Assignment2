@@ -1,5 +1,5 @@
 # RT1 Assignment 2
-##INTRODUCTION
+## INTRODUCTION
 
 The second assignment is very similar to the first assignment. The only difference is that for the second assignment, ROS is being used for controlling the robot. The robot is endowed with laser scanners. The task at hand is to have 2 nodes, one to control the robot and the other to interact with the user. The way the user can interact is by increasing or decreasing the speed of the robot and also by resetting it to its original position.
 
