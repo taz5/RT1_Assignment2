@@ -42,7 +42,7 @@ It also contains a package.xml and a CMakeLists.txt. What are they?
 The **package manifest** is an XML file called **package.xml** that must be included with any catkin-compliant package's root folder. This file defines properties about the package such as the package name, version numbers, author, maintainers, and dependencies on other catkin packages.
 In my case, in the package.xml file I needed to make changes to the following:
 
-1. ** Build Tool Dependencies**: It specifies build system tools which this package needs to build itself. My build tool dependency is catkin.
+1. **Build Tool Dependencies**: It specifies build system tools which this package needs to build itself. My build tool dependency is catkin.
 2. **Build Dependencies**: It specifies which packages are needed to build this package. The packages that I needed to build were:
     i. roscpp
     ii. rospy (not needed because we are working on roscpp)
